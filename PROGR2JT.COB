@@ -193,7 +193,6 @@
            ACCEPT TAPELIDO
            ACCEPT W-ACT FROM ESCAPE KEY
            IF W-ACT = 01
-                   CLOSE CADAMIGO
                    GO TO ROT-FIM.
            IF W-ACT = 02
                      MOVE "*** TECLEI O F1 **" TO MENS
