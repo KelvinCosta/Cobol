@@ -4,7 +4,7 @@
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
            SELECT VEHICLES-FILE ASSIGN TO 'vehicles.txt'
-           ORGANIZATION IS SEQUENTIAL.
+           ORGANIZATION IS LINE SEQUENTIAL.
        DATA DIVISION.
 
        FILE SECTION.
@@ -26,7 +26,8 @@
        77 CONTINUAR PIC X VALUE 'S'.
        
        PROCEDURE DIVISION.
-           OPEN OUTPUT VEHICLES-FILE
+           OPEN OUTPUT  VEHICLES-FILE
+           CLOSE VEHICLES-FILE 
            DISPLAY "CADASTRO DE VEICULOS"
            PERFORM UNTIL OPCAO = '5'
 
@@ -41,6 +42,7 @@
               
               EVALUATE OPCAO
                  WHEN 1
+                    OPEN EXTEND VEHICLES-FILE 
                     DISPLAY "INSERIR VEICULOS"
                     PERFORM UNTIL CONTINUAR = 'N' OR 'n'
                        
@@ -80,14 +82,17 @@
                        ACCEPT CONTINUAR
 
                     END-PERFORM
+                    CLOSE VEHICLES-FILE 
                  WHEN 2
                     DISPLAY "ALTERAR VEICULOS" 
                  WHEN 3
                     DISPLAY "EXCLUIR VEICULOS"
                  WHEN 4
-                    DISPLAY "CONSULTAR VEICULOS"
+                    OPEN INPUT VEHICLES-FILE 
+                    DISPLAY 'VEICULOS CADASTRADOS: '
+                    DISPLAY VEHICLE-STRUCT IN VEHICLES-FILE
+                    CLOSE VEHICLES-FILE 
               END-EVALUATE
            END-PERFORM.
-           CLOSE VEHICLES-FILE.
            STOP RUN.
 
