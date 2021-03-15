@@ -21,46 +21,68 @@
            02 MARCA PIC 9(01).
            02 ANOFABRICACAO PIC 9(4).
            02 SITUACAO PIC X(1).
+       77 OPCAO PIC 9.
        77 CONTINUAR PIC X VALUE 'S'.
        PROCEDURE DIVISION.
-           DISPLAY "CADASTRO DE VEICULOS"
            OPEN OUTPUT VEHICLES-FILE
-           PERFORM UNTIL CONTINUAR = 'N' OR 'n'
-              DISPLAY "INSIRA PLACA :-> "
-              ACCEPT PLACA 
-   
-              DISPLAY "INSIRA PROPRIETARIO :-> "
-              ACCEPT PROPRIETARIO 
-   
-              DISPLAY "CODIGO MARCAS"
-              DISPLAY "1 - FORD"
-              DISPLAY "2 - GM"
-              DISPLAY "3 - FIAT"
-              DISPLAY "4 - VW"
-              DISPLAY "INSIRA CODIGO MARCA :-> "
-              ACCEPT MARCA 
-
-              DISPLAY "INSIRA ANO FABRICACAO (4 DIGITOS) :-> "
-              ACCEPT ANOFABRICACAO
-
-              DISPLAY "CODIGO SITUACAO"
-              DISPLAY "M - MANUTENCAO"
-              DISPLAY "B - BATIDO"
-              DISPLAY "S - SUCATA"
-              DISPLAY "O - ORIGINAL"
-              DISPLAY "N - NORMAL"
-              DISPLAY "INSIRA CODIGO SITUACAO :-> "
-              ACCEPT SITUACAO 
-
-              DISPLAY 'INSERINDO VEICULO: '
-              DISPLAY VEHICLE-RECORD
+           PERFORM UNTIL OPCAO = '5'
+              DISPLAY "OPCOES"
+              DISPLAY "1 - INSERIR"
+              DISPLAY "2 - ALTERAR"
+              DISPLAY "3 - EXCLUIR"
+              DISPLAY "4 - CONSULTAR"
+              DISPLAY "5 - SAIR"
+              DISPLAY "INSIRA OPCAO"
+              ACCEPT OPCAO
               
-              MOVE VEHICLE-RECORD TO VEHICLE-STRUCT
-              WRITE VEHICLE-STRUCT
-   
-              DISPLAY "INSERIR MAIS VEICULOS??(S/N):-> \"
-              ACCEPT CONTINUAR
+              EVALUATE OPCAO
+                 WHEN 1
+                    DISPLAY "CADASTRO DE VEICULOS"
+                    PERFORM UNTIL CONTINUAR = 'N' OR 'n'
+                       
+                       DISPLAY "INSIRA PLACA (XXX9999):-> "
+                       ACCEPT PLACA 
+               
+                       DISPLAY "INSIRA PROPRIETARIO :-> "
+                       ACCEPT PROPRIETARIO 
+                         
+                       DISPLAY "CODIGO MARCAS"
+                       DISPLAY "1 - FORD"
+                       DISPLAY "2 - GM"
+                       DISPLAY "3 - FIAT"
+                       DISPLAY "4 - VW"
+                       DISPLAY "INSIRA CODIGO MARCA :-> "
+                       ACCEPT MARCA 
+              
+                       DISPLAY "INSIRA ANO FABRICACAO (XXXX) :-> "
+                       ACCEPT ANOFABRICACAO
+              
+                       DISPLAY "CODIGO SITUACAO"
+                       DISPLAY "M - MANUTENCAO"
+                       DISPLAY "B - BATIDO"
+                       DISPLAY "S - SUCATA"
+                       DISPLAY "O - ORIGINAL"
+                       DISPLAY "N - NORMAL"
+                       DISPLAY "INSIRA CODIGO SITUACAO :-> "
+                       ACCEPT SITUACAO 
+              
+                       DISPLAY 'INSERINDO VEICULO: '
+                       DISPLAY VEHICLE-RECORD
+                      
+                       MOVE VEHICLE-RECORD TO VEHICLE-STRUCT
+                       WRITE VEHICLE-STRUCT
+  
+                       DISPLAY "INSERIR MAIS VEICULOS??(S/N):-> \"
+                       ACCEPT CONTINUAR
 
+                    END-PERFORM
+                 WHEN 2
+                    DISPLAY "OPCAO 2" 
+                 WHEN 3
+                    DISPLAY "OPCAO 3"
+                 WHEN 4
+                    DISPLAY "OPCAO 4"
+              END-EVALUATE
            END-PERFORM.
            CLOSE VEHICLES-FILE.
            STOP RUN.
