@@ -6,6 +6,7 @@
            SELECT VEHICLES-FILE ASSIGN TO 'vehicles.txt'
            ORGANIZATION IS SEQUENTIAL.
        DATA DIVISION.
+
        FILE SECTION.
        FD VEHICLES-FILE.
        01 VEHICLE-STRUCT.
@@ -23,9 +24,12 @@
            02 SITUACAO PIC X(1).
        77 OPCAO PIC 9.
        77 CONTINUAR PIC X VALUE 'S'.
+       
        PROCEDURE DIVISION.
            OPEN OUTPUT VEHICLES-FILE
+           DISPLAY "CADASTRO DE VEICULOS"
            PERFORM UNTIL OPCAO = '5'
+
               DISPLAY "OPCOES"
               DISPLAY "1 - INSERIR"
               DISPLAY "2 - ALTERAR"
@@ -37,7 +41,7 @@
               
               EVALUATE OPCAO
                  WHEN 1
-                    DISPLAY "CADASTRO DE VEICULOS"
+                    DISPLAY "INSERIR VEICULOS"
                     PERFORM UNTIL CONTINUAR = 'N' OR 'n'
                        
                        DISPLAY "INSIRA PLACA (XXX9999):-> "
@@ -77,11 +81,11 @@
 
                     END-PERFORM
                  WHEN 2
-                    DISPLAY "OPCAO 2" 
+                    DISPLAY "ALTERAR VEICULOS" 
                  WHEN 3
-                    DISPLAY "OPCAO 3"
+                    DISPLAY "EXCLUIR VEICULOS"
                  WHEN 4
-                    DISPLAY "OPCAO 4"
+                    DISPLAY "CONSULTAR VEICULOS"
               END-EVALUATE
            END-PERFORM.
            CLOSE VEHICLES-FILE.
