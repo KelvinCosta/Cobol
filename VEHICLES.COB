@@ -24,8 +24,9 @@
            02 SITUACAO PIC X(1).
        77 OPCAO PIC 9.
        77 CONTINUAR PIC X VALUE 'S'.
-       
+       77 EOF-SWITCH PIC X VALUE 'N'.
        PROCEDURE DIVISION.
+           OPEN INPUT VEHICLES-FILE 
            OPEN OUTPUT  VEHICLES-FILE
            CLOSE VEHICLES-FILE 
            DISPLAY "CADASTRO DE VEICULOS"
@@ -90,7 +91,14 @@
                  WHEN 4
                     OPEN INPUT VEHICLES-FILE 
                     DISPLAY 'VEICULOS CADASTRADOS: '
-                    DISPLAY VEHICLE-STRUCT IN VEHICLES-FILE
+                    PERFORM UNTIL EOF-SWITCH = "Y"
+                       READ VEHICLES-FILE
+                          AT END
+                             MOVE "Y" TO EOF-SWITCH
+                          NOT AT END
+                             DISPLAY VEHICLE-STRUCT IN VEHICLES-FILE
+                       END-READ 
+                    END-PERFORM
                     CLOSE VEHICLES-FILE 
               END-EVALUATE
            END-PERFORM.
