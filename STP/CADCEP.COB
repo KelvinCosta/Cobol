@@ -1,10 +1,12 @@
        IDENTIFICATION DIVISION.
        PROGRAM-ID. VEHICLES.
+
        ENVIRONMENT DIVISION.
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
            SELECT CEP-FILE ASSIGN TO 'vehicles.txt'
               ORGANIZATION IS SEQUENTIAL.
+
        DATA DIVISION.
        FILE SECTION.
        FD CEP-FILE.
@@ -18,6 +20,7 @@
            02 FSTATUS PIC X(01).
            02 FOBSERVACAO PIC X(40).
            02 FDATA PIC 9(08).
+
        WORKING-STORAGE SECTION.
        01 CEP-RECORD.
            02 RCEP PIC X(08).
@@ -41,35 +44,82 @@
        01 TXTANOFABRICACAO PIC 9(4).
        01 TXTSITUACAO PIC X(1).
 
+
+       SCREEN SECTION.
+       01  DATA-ENTRY-SCREEN.
+           05 CEP-SECTION.
+              10 VALUE "CADASTRO CEP" BLANK SCREEN LINE 1 COL 35.
+              10 VALUE "CEP:" LINE 3 COL 3.
+              10 CEP-INPUT LINE 3 COL 35 PIC X(08) TO RCEP.
+           05 LOGRADOURO-SECTION.
+              10 VALUE "INSIRA LOGRADOURO:" LINE 5 COL 3.
+              10 LOGRADOURO-INPUT LINE 5 COL 35
+                 PIC X(35) TO RLOGRADOURO.
+           05 BAIRRO-SECTION.
+              10 VALUE "INSIRA BAIRRO:" LINE 7 COL 3.
+              10 BAIRRO-INPUT LINE 7 COL 35
+                 PIC X(35) TO RBAIRRO.
+           05 CIDADE-SECTION.
+              10 VALUE "INSIRA CIDADE:" LINE 9 COL 3.
+              10 CIDADE-INPUT LINE 9 COL 35
+                 PIC X(35) TO RCIDADE.
+           05 UF-SECTION.
+              10 VALUE "INSIRA UF:" LINE 11 COL 3.
+              10 UF-INPUT LINE 11 COL 35
+                 PIC X(35) TO RUF.
+           05 PR-SECTION.
+              10 VALUE "INSIRA PONTO REFERENCIA:" LINE 13 COL 3.
+              10 PR-INPUT LINE 13 COL 35
+                 PIC X(35) TO RPONTOREFERENCIA.
+           05 STATUS-SECTION.
+              10 VALUE "INSIRA STATUS:" LINE 15 COL 3.
+              10 STATUS-INPUT LINE 15 COL 35
+                 PIC X(35) TO RSTATUS.
+           05 OBS-SECTION.
+              10 VALUE "INSIRA OBSERVACAO:" LINE 17 COL 3.
+              10 OBS-INPUT LINE 17 COL 35
+                 PIC X(35) TO ROBSERVACAO.
+
+       01  MENU-SCREEN.
+           05 VALUE "CADASTRO DE CEPS" BLANK SCREEN LINE 1 COL 35.
+           05 VALUE "OPCOES" LINE 3 COL 3.
+           05 VALUE "1 - INSERIR" LINE 4 COL 5.
+           05 VALUE "2 - ALTERAR" LINE 5 COL 5.
+           05 VALUE "3 - EXCLUIR" LINE 6 COL 5.
+           05 VALUE "4 - CONSULTAR" LINE 7 COL 5.
+           05 VALUE "5 - SAIR" LINE 8 COL 5.
+           05 VALUE "INSIRA OPCAO" LINE 10 COL 3.
+           05 OPCAO-INPUT LINE 10 COL 35  PIC 9(02) TO OPCAO.
+
        PROCEDURE DIVISION.
-       OPEN OUTPUT CEP-FILE
-       CLOSE CEP-FILE
-       GO TO MENU-SCREEN.
+           OPEN OUTPUT CEP-FILE
+           CLOSE CEP-FILE
+           GO TO INICIO.
 
-       INSERT-VEHICLE-REG.
-           DISPLAY "INSIRA RCEP: "
-           ACCEPT RCEP
+       INSERT-CEP-REG.
+           DISPLAY CEP-SECTION
+           ACCEPT CEP-INPUT
 
-           DISPLAY "INSIRA RLOGRADOURO: "
-           ACCEPT RLOGRADOURO
+           DISPLAY LOGRADOURO-SECTION
+           ACCEPT LOGRADOURO-INPUT
 
-               DISPLAY "INSIRA RBAIRRO: "
-           ACCEPT RBAIRRO
+           DISPLAY BAIRRO-SECTION
+           ACCEPT BAIRRO-INPUT
 
-           DISPLAY "INSIRA RCIDADE: "
-           ACCEPT RCIDADE
+           DISPLAY CIDADE-SECTION
+           ACCEPT CIDADE-INPUT
 
-           DISPLAY "INSIRA RUF: "
-           ACCEPT RUF
+           DISPLAY UF-SECTION
+           ACCEPT UF-INPUT
 
-           DISPLAY "INSIRA RPONTOREFERENCIA: "
-           ACCEPT RPONTOREFERENCIA
+           DISPLAY PR-SECTION
+           ACCEPT PR-INPUT
 
-           DISPLAY "INSIRA RSTATUS: "
-           ACCEPT RSTATUS
+           DISPLAY STATUS-SECTION
+           ACCEPT STATUS-INPUT
 
-           DISPLAY "INSIRA ROBSERVACAO: "
-           ACCEPT ROBSERVACAO
+           DISPLAY OBS-SECTION
+           ACCEPT OBS-INPUT
 
            DISPLAY 'INSERINDO CEP: '
            DISPLAY CEP-RECORD
@@ -88,45 +138,35 @@
            END-PERFORM
            CLOSE CEP-FILE.
 
-       MENU-SCREEN.
-           DISPLAY "CADASTRO DE CEPS"
-           PERFORM UNTIL OPCAO = '5'
+       INICIO.
+           DISPLAY MENU-SCREEN
+           ACCEPT OPCAO-INPUT
 
-              DISPLAY "OPCOES"
-              DISPLAY "1 - INSERIR"
-              DISPLAY "2 - ALTERAR"
-              DISPLAY "3 - EXCLUIR"
-              DISPLAY "4 - CONSULTAR"
-              DISPLAY "5 - SAIR"
-              DISPLAY "INSIRA OPCAO"
-              ACCEPT OPCAO
-
-              EVALUATE OPCAO
-                 WHEN 1
-                    OPEN OUTPUT CEP-FILE
-                    DISPLAY "INSERIR CEPS"
-                    PERFORM UNTIL CONTINUAR = 'N' OR 'n'
-                       PERFORM INSERT-VEHICLE-REG
-                       DISPLAY "INSERIR MAIS VEICULOS??(S/N):-> "
-                       ACCEPT CONTINUAR
-                    END-PERFORM
-                    CLOSE CEP-FILE
-                 WHEN 2
-                    DISPLAY 'INSIRA CEP A SER ALTERADO:'
-                    ACCEPT ALTER-CEP
-                    PERFORM UNTIL EOF-SWITCH = "Y"
-                       READ CEP-FILE INTO CEP-STRUCT
-                          AT END MOVE "Y" TO EOF-SWITCH
-                          NOT AT END
-                             IF RCEP = ALTER-CEP
-                                DISPLAY CEP-STRUCT
-                                MOVE "Y" TO EOF-SWITCH
-                             END-IF
-                    END-PERFORM
-                 WHEN 3
-                    DISPLAY "EXCLUIR VEICULOS"
-                 WHEN 4
-                    PERFORM READ-CEP-REG
-              END-EVALUATE
-           END-PERFORM.
+           EVALUATE OPCAO
+               WHEN 1
+                  OPEN OUTPUT CEP-FILE
+                  DISPLAY "INSERIR CEPS"
+                  PERFORM UNTIL CONTINUAR = 'N' OR 'n'
+                     PERFORM INSERT-CEP-REG
+                     DISPLAY "INSERIR MAIS CEPS??(S/N):-> "
+                     ACCEPT CONTINUAR
+                  END-PERFORM
+                  CLOSE CEP-FILE
+               WHEN 2
+                  DISPLAY 'INSIRA CEP A SER ALTERADO:'
+                  ACCEPT ALTER-CEP
+                  PERFORM UNTIL EOF-SWITCH = "Y"
+                     READ CEP-FILE INTO CEP-STRUCT
+                        AT END MOVE "Y" TO EOF-SWITCH
+                        NOT AT END
+                           IF RCEP = ALTER-CEP
+                              DISPLAY CEP-STRUCT
+                              MOVE "Y" TO EOF-SWITCH
+                           END-IF
+                  END-PERFORM
+               WHEN 3
+                  DISPLAY "EXCLUIR VEICULOS"
+               WHEN 4
+                  PERFORM READ-CEP-REG
+           END-EVALUATE.
            STOP RUN.
