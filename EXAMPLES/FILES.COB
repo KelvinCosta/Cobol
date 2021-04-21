@@ -49,4 +49,3 @@
            *> close the file
            CLOSE TRANSACTIONS
            STOP RUN.
-
