@@ -33,10 +33,12 @@
            02 ROBSERVACAO PIC X(40).
            02 RDATA PIC 9(08).
 
-       77 OPCAO PIC 9.
-       77 CONTINUAR PIC X VALUE 'S'.
-       77 EOF-SWITCH PIC X VALUE 'N'.
-       77 ALTER-CEP PIC X(9).
+       77  OPCAO PIC 9.
+       77  CONTINUAR PIC X VALUE 'S'.
+       77  EOF-SWITCH PIC X VALUE 'N'.
+       77  ALTER-CEP PIC X(9).
+       77  WS-WAIT PIC X.
+       77  LN PIC 9.
 
        01 TXTPLACA PIC X(25).
        01 TXTPROPRIETARIO PIC X(30).
@@ -80,6 +82,39 @@
               10 OBS-INPUT LINE 17 COL 35
                  PIC X(35) TO ROBSERVACAO.
 
+       01  DATA-SHOW-SCREEN.
+           05 CEP-SHOW-SECTION.
+              10 VALUE "CEP:" BLANK SCREEN LINE LN COL 3.
+              10 CEP-OUTPUT LINE LN COL 35 PIC X(08) FROM FCEP.
+           05 LOGRADOURO-SHOW-SECTION.
+              10 VALUE "LOGRADOURO:" LINE LN COL 3.
+              10 LOGRADOURO-OUTPUT LINE LN COL 35
+                 PIC X(35) FROM FLOGRADOURO.
+           05 BAIRRO-SHOW-SECTION.
+              10 VALUE "BAIRRO:" LINE LN COL 3.
+              10 BAIRRO-OUTPUT LINE LN COL 35
+                 PIC X(35) FROM FBAIRRO.
+           05 CIDADE-SHOW-SECTION.
+              10 VALUE "CIDADE:" LINE LN COL 3.
+              10 CIDADE-OUTPUT LINE LN COL 35
+                 PIC X(35) FROM FCIDADE.
+           05 UF-SHOW-SECTION.
+              10 VALUE "UF:" LINE LN COL 3.
+              10 UF-OUTPUT LINE LN COL 35
+                 PIC X(35) FROM FUF.
+           05 PR-SHOW-SECTION.
+              10 VALUE "PONTO REFERENCIA:" LINE LN COL 3.
+              10 PR-OUTPUT LINE LN COL 35
+                 PIC X(35) FROM FPONTOREFERENCIA.
+           05 STATUS-SHOW-SECTION.
+              10 VALUE "STATUS:" LINE LN COL 3.
+              10 STATUS-OUTPUT LINE LN COL 35
+                 PIC X(35) FROM FSTATUS.
+           05 OBS-SHOW-SECTION.
+              10 VALUE "OBSERVACAO:" LINE LN COL 3.
+              10 OBS-OUTPUT LINE LN COL 35
+                 PIC X(35) FROM FOBSERVACAO.
+
        01  MENU-SCREEN.
            05 VALUE "CADASTRO DE CEPS" BLANK SCREEN LINE 1 COL 35.
            05 VALUE "OPCOES" LINE 3 COL 3.
@@ -89,7 +124,7 @@
            05 VALUE "4 - CONSULTAR" LINE 7 COL 5.
            05 VALUE "5 - SAIR" LINE 8 COL 5.
            05 VALUE "INSIRA OPCAO" LINE 10 COL 3.
-           05 OPCAO-INPUT LINE 10 COL 35  PIC 9(02) TO OPCAO.
+           05 OPCAO-INPUT LINE 10 COL 35  PIC 9(1) TO OPCAO.
 
        PROCEDURE DIVISION.
            OPEN OUTPUT CEP-FILE
@@ -128,17 +163,35 @@
            WRITE CEP-STRUCT.
 
        READ-CEP-REG.
+           MOVE 3 TO LN
            OPEN INPUT CEP-FILE
            DISPLAY 'CEPS CADASTRADOS: '
            PERFORM UNTIL EOF-SWITCH = "Y"
                READ CEP-FILE INTO CEP-STRUCT
                    AT END MOVE "Y" TO EOF-SWITCH
-                   NOT AT END DISPLAY CEP-STRUCT
+                   NOT AT END
+                       DISPLAY CEP-SHOW-SECTION
+                       ADD 1 TO LN
+                       DISPLAY LOGRADOURO-SHOW-SECTION
+                       ADD 1 TO LN
+                       DISPLAY BAIRRO-SHOW-SECTION
+                       ADD 1 TO LN
+                       DISPLAY CIDADE-SHOW-SECTION
+                       ADD 1 TO LN
+                       DISPLAY UF-SHOW-SECTION
+                       ADD 1 TO LN
+                       DISPLAY PR-SHOW-SECTION
+                       ADD 1 TO LN
+                       DISPLAY STATUS-SHOW-SECTION
+                       ADD 1 TO LN
+                       DISPLAY OBS-SHOW-SECTION
+                       ADD 2 TO LN
                END-READ
            END-PERFORM
            CLOSE CEP-FILE.
 
        INICIO.
+
            DISPLAY MENU-SCREEN
            ACCEPT OPCAO-INPUT
 
@@ -152,6 +205,7 @@
                      ACCEPT CONTINUAR
                   END-PERFORM
                   CLOSE CEP-FILE
+                  GO TO INICIO
                WHEN 2
                   DISPLAY 'INSIRA CEP A SER ALTERADO:'
                   ACCEPT ALTER-CEP
@@ -164,9 +218,13 @@
                               MOVE "Y" TO EOF-SWITCH
                            END-IF
                   END-PERFORM
+                  GO TO INICIO
                WHEN 3
                   DISPLAY "EXCLUIR VEICULOS"
+                  GO TO INICIO
                WHEN 4
                   PERFORM READ-CEP-REG
+                  ACCEPT WS-WAIT
+                  GO TO INICIO
            END-EVALUATE.
            STOP RUN.
