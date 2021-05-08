@@ -26,7 +26,7 @@
            02 MARCA PIC 9(01).
            02 ANOFABRICACAO PIC 9(4).
            02 SITUACAO PIC X(1).
-       
+
        77 OPCAO PIC 9.
        77 CONTINUAR PIC X VALUE 'S'.
        77 EOF-SWITCH PIC X VALUE 'N'.
@@ -42,27 +42,27 @@
 
        INICIO.
            OPEN OUTPUT  VEHICLES-FILE
-           CLOSE VEHICLES-FILE 
+           CLOSE VEHICLES-FILE
            GO TO MENU-SCREEN.
-      
+
        INSERT-VEHICLE-REG.
            DISPLAY "INSIRA PLACA (XXX9999):-> "
-           ACCEPT PLACA 
-               
+           ACCEPT PLACA
+
            DISPLAY "INSIRA PROPRIETARIO :-> "
-           ACCEPT PROPRIETARIO 
-             
+           ACCEPT PROPRIETARIO
+
            DISPLAY "CODIGO MARCAS"
            DISPLAY "1 - FORD"
            DISPLAY "2 - GM"
            DISPLAY "3 - FIAT"
            DISPLAY "4 - VW"
            DISPLAY "INSIRA CODIGO MARCA :-> "
-           ACCEPT MARCA 
-           
+           ACCEPT MARCA
+
            DISPLAY "INSIRA ANO FABRICACAO (XXXX) :-> "
            ACCEPT ANOFABRICACAO
-           
+
            DISPLAY "CODIGO SITUACAO"
            DISPLAY "M - MANUTENCAO"
            DISPLAY "B - BATIDO"
@@ -70,16 +70,16 @@
            DISPLAY "O - ORIGINAL"
            DISPLAY "N - NORMAL"
            DISPLAY "INSIRA CODIGO SITUACAO :-> "
-           ACCEPT SITUACAO 
-           
+           ACCEPT SITUACAO
+
            DISPLAY 'INSERINDO VEICULO: '
            DISPLAY VEHICLE-RECORD
-             
+
            MOVE VEHICLE-RECORD TO VEHICLE-STRUCT
            WRITE VEHICLE-STRUCT.
 
        READ-VEHICLE-REG.
-           OPEN INPUT VEHICLES-FILE 
+           OPEN INPUT VEHICLES-FILE
                     DISPLAY 'VEICULOS CADASTRADOS: '
                     PERFORM UNTIL EOF-SWITCH = "Y"
                        READ VEHICLES-FILE
@@ -87,7 +87,7 @@
                              MOVE "Y" TO EOF-SWITCH
                           NOT AT END
                              DISPLAY VEHICLE-STRUCT IN VEHICLES-FILE
-                       END-READ 
+                       END-READ
                     END-PERFORM
                     CLOSE VEHICLES-FILE.
 
@@ -103,32 +103,32 @@
               DISPLAY "5 - SAIR"
               DISPLAY "INSIRA OPCAO"
               ACCEPT OPCAO
-              
+
               EVALUATE OPCAO
                  WHEN 1
-                    OPEN I-O VEHICLES-FILE 
+                    OPEN I-O VEHICLES-FILE
                     DISPLAY "INSERIR VEICULOS"
                     PERFORM UNTIL CONTINUAR = 'N' OR 'n'
-                       PERFORM INSERT-VEHICLE-REG  
+                       PERFORM INSERT-VEHICLE-REG
                        DISPLAY "INSERIR MAIS VEICULOS??(S/N):-> "
                        ACCEPT CONTINUAR
                     END-PERFORM
-                    CLOSE VEHICLES-FILE 
+                    CLOSE VEHICLES-FILE
                  WHEN 2
                     DISPLAY 'INSIRA PLACA DO CARRO A SER ALTERADO:'
                     ACCEPT ALTER-VEHICLE
 
-                    OPEN INPUT VEHICLES-FILE 
+                    OPEN INPUT VEHICLES-FILE
                     PERFORM UNTIL EOF-SWITCH = "Y"
-                       READ VEHICLES-FILE 
-                          AT END   
+                       READ VEHICLES-FILE
+                          AT END
                              MOVE "Y" TO EOF-SWITCH
                           NOT AT END
                              IF PLACA = ALTER-VEHICLE
                                 DISPLAY VEHICLE-STRUCT IN VEHICLES-FILE
                                 MOVE "Y" TO EOF-SWITCH
                              END-IF
-                    END-PERFORM 
+                    END-PERFORM
                     CLOSE VEHICLES-FILE
                  WHEN 3
                     DISPLAY "EXCLUIR VEICULOS"
@@ -137,4 +137,3 @@
               END-EVALUATE
            END-PERFORM.
            STOP RUN.
-

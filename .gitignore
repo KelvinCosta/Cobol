@@ -1,0 +1,5 @@
+
+bin/*.exe
+STP/bin/*.exe
+*.exe
+STP/bin/CADCEP.exe

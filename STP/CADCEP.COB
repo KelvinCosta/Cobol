@@ -38,7 +38,7 @@
        77  EOF-SWITCH PIC X VALUE 'N'.
        77  ALTER-CEP PIC X(9).
        77  WS-WAIT PIC X.
-       77  LN PIC 9.
+       77  NEW_LINE PIC 9.
 
        01 TXTPLACA PIC X(25).
        01 TXTPROPRIETARIO PIC X(30).
@@ -60,15 +60,15 @@
            05 BAIRRO-SECTION.
               10 VALUE "INSIRA BAIRRO:" LINE 7 COL 3.
               10 BAIRRO-INPUT LINE 7 COL 35
-                 PIC X(35) TO RBAIRRO.
+                 PIC X(20) TO RBAIRRO.
            05 CIDADE-SECTION.
               10 VALUE "INSIRA CIDADE:" LINE 9 COL 3.
               10 CIDADE-INPUT LINE 9 COL 35
-                 PIC X(35) TO RCIDADE.
+                 PIC X(20) TO RCIDADE.
            05 UF-SECTION.
               10 VALUE "INSIRA UF:" LINE 11 COL 3.
               10 UF-INPUT LINE 11 COL 35
-                 PIC X(35) TO RUF.
+                 PIC X(02) TO RUF.
            05 PR-SECTION.
               10 VALUE "INSIRA PONTO REFERENCIA:" LINE 13 COL 3.
               10 PR-INPUT LINE 13 COL 35
@@ -76,43 +76,45 @@
            05 STATUS-SECTION.
               10 VALUE "INSIRA STATUS:" LINE 15 COL 3.
               10 STATUS-INPUT LINE 15 COL 35
-                 PIC X(35) TO RSTATUS.
+                 PIC X(01) TO RSTATUS.
            05 OBS-SECTION.
               10 VALUE "INSIRA OBSERVACAO:" LINE 17 COL 3.
               10 OBS-INPUT LINE 17 COL 35
-                 PIC X(35) TO ROBSERVACAO.
+                 PIC X(40) TO ROBSERVACAO.
 
        01  DATA-SHOW-SCREEN.
+           05 DATA-SHOW-TITLE.
+              10 VALUE "CEPS INSERIDOS" BLANK SCREEN LINE 1 COL 3.
            05 CEP-SHOW-SECTION.
-              10 VALUE "CEP:" BLANK SCREEN LINE LN COL 3.
-              10 CEP-OUTPUT LINE LN COL 35 PIC X(08) FROM FCEP.
+              10 VALUE "CEP: " LINE NEW_LINE COL 3.
+              10 CEP-OUTPUT LINE NEW_LINE COL 35 PIC X(08) FROM FCEP.
            05 LOGRADOURO-SHOW-SECTION.
-              10 VALUE "LOGRADOURO:" LINE LN COL 3.
-              10 LOGRADOURO-OUTPUT LINE LN COL 35
+              10 VALUE "LOGRADOURO: " LINE NEW_LINE COL 3.
+              10 LOGRADOURO-OUTPUT LINE NEW_LINE COL 35
                  PIC X(35) FROM FLOGRADOURO.
            05 BAIRRO-SHOW-SECTION.
-              10 VALUE "BAIRRO:" LINE LN COL 3.
-              10 BAIRRO-OUTPUT LINE LN COL 35
+              10 VALUE "BAIRRO: " LINE NEW_LINE COL 3.
+              10 BAIRRO-OUTPUT LINE NEW_LINE COL 35
                  PIC X(35) FROM FBAIRRO.
            05 CIDADE-SHOW-SECTION.
-              10 VALUE "CIDADE:" LINE LN COL 3.
-              10 CIDADE-OUTPUT LINE LN COL 35
+              10 VALUE "CIDADE: " LINE NEW_LINE COL 3.
+              10 CIDADE-OUTPUT LINE NEW_LINE COL 35
                  PIC X(35) FROM FCIDADE.
            05 UF-SHOW-SECTION.
-              10 VALUE "UF:" LINE LN COL 3.
-              10 UF-OUTPUT LINE LN COL 35
+              10 VALUE "UF: " LINE NEW_LINE COL 3.
+              10 UF-OUTPUT LINE NEW_LINE COL 35
                  PIC X(35) FROM FUF.
            05 PR-SHOW-SECTION.
-              10 VALUE "PONTO REFERENCIA:" LINE LN COL 3.
-              10 PR-OUTPUT LINE LN COL 35
+              10 VALUE "PONTO REFERENCIA: " LINE NEW_LINE COL 3.
+              10 PR-OUTPUT LINE NEW_LINE COL 35
                  PIC X(35) FROM FPONTOREFERENCIA.
            05 STATUS-SHOW-SECTION.
-              10 VALUE "STATUS:" LINE LN COL 3.
-              10 STATUS-OUTPUT LINE LN COL 35
+              10 VALUE "STATUS: " LINE NEW_LINE COL 3.
+              10 STATUS-OUTPUT LINE NEW_LINE COL 35
                  PIC X(35) FROM FSTATUS.
            05 OBS-SHOW-SECTION.
-              10 VALUE "OBSERVACAO:" LINE LN COL 3.
-              10 OBS-OUTPUT LINE LN COL 35
+              10 VALUE "OBSERVACAO: " LINE NEW_LINE COL 3.
+              10 OBS-OUTPUT LINE NEW_LINE COL 35
                  PIC X(35) FROM FOBSERVACAO.
 
        01  MENU-SCREEN.
@@ -163,7 +165,8 @@
            WRITE CEP-STRUCT.
 
        READ-CEP-REG.
-           MOVE 3 TO LN
+           MOVE 3 TO NEW_LINE
+           MOVE "N" TO EOF-SWITCH
            OPEN INPUT CEP-FILE
            DISPLAY 'CEPS CADASTRADOS: '
            PERFORM UNTIL EOF-SWITCH = "Y"
@@ -171,21 +174,21 @@
                    AT END MOVE "Y" TO EOF-SWITCH
                    NOT AT END
                        DISPLAY CEP-SHOW-SECTION
-                       ADD 1 TO LN
+                       ADD 1 TO NEW_LINE
                        DISPLAY LOGRADOURO-SHOW-SECTION
-                       ADD 1 TO LN
+                       ADD 1 TO NEW_LINE
                        DISPLAY BAIRRO-SHOW-SECTION
-                       ADD 1 TO LN
+                       ADD 1 TO NEW_LINE
                        DISPLAY CIDADE-SHOW-SECTION
-                       ADD 1 TO LN
+                       ADD 1 TO NEW_LINE
                        DISPLAY UF-SHOW-SECTION
-                       ADD 1 TO LN
+                       ADD 1 TO NEW_LINE
                        DISPLAY PR-SHOW-SECTION
-                       ADD 1 TO LN
+                       ADD 1 TO NEW_LINE
                        DISPLAY STATUS-SHOW-SECTION
-                       ADD 1 TO LN
+                       ADD 1 TO NEW_LINE
                        DISPLAY OBS-SHOW-SECTION
-                       ADD 2 TO LN
+                       ADD 2 TO NEW_LINE
                END-READ
            END-PERFORM
            CLOSE CEP-FILE.
@@ -207,6 +210,7 @@
                   CLOSE CEP-FILE
                   GO TO INICIO
                WHEN 2
+                  MOVE "N" TO EOF-SWITCH
                   DISPLAY 'INSIRA CEP A SER ALTERADO:'
                   ACCEPT ALTER-CEP
                   PERFORM UNTIL EOF-SWITCH = "Y"

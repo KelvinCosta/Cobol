@@ -1,0 +1,245 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.     COBA03.
+       DATE-WRITTEN.   20 DE AGOSTO 2018.
+       DATE-COMPILED.
+       AUTHOR.         PROGRAMADOR-IBM.
+       REMARKS.
+      *----------------------------------------------------------------*
+      *   EMPRESA    : IBM                                             *
+      *   SUBSISTEMA : CURSOS                                          *
+      *   PROGRAMA   : COBA03
+      *   PARAMETROS : PARA1      = EMPRESA                            *
+      *----------------------------------------------------------------*
+      *                ALTERACOES EFETUADAS                            *
+      *----------------------------------------------------------------*
+      * NOME        ID/DATA    MOTIVO                                  *
+      * ----------- ---------- --------------------------------------- *
+V1.1  * WILTON(IBM) 22/08/2018 Desenvolvimento do programa             *
+      *                        Este programa vai ler uma tabela Oracle *
+      *                        e gravar um arquivo .txt                *
+      *----------------------------------------------------------------*
+ 
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       SPECIAL-NAMES.
+           C01 IS SALTAR
+           DECIMAL-POINT IS COMMA.
+
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT ARQ-SAIDA  ASSIGN  TO DISK, WS-ARQSAIDA
+                  ORGANIZATION IS LINE SEQUENTIAL.
+
+       DATA DIVISION.
+       FILE SECTION.
+
+       FD   ARQ-SAIDA
+            LABEL RECORD OMITTED.
+       01   REG-RAMOS        PIC X(50).
+       
+       WORKING-STORAGE SECTION.
+       
+      *----------------------------------------------------------------*
+      *        CONTROLE DE ARQUIVOS                                    *
+      *----------------------------------------------------------------*
+       01  WS-ARQSAIDA            PIC  X(23).
+       
+      *----------------------------------------------------------------*
+      *        CONTROLE DE LEITURA DE TABELAS                          *
+      *----------------------------------------------------------------*
+       01  STATUS-TABELAS.
+           03 RESULTADO-A9989001   PIC 9(01) VALUE  0.
+           03 RESULTADO-A1001800   PIC 9(01) VALUE  0.
+       
+      *----------------------------------------------------------------*
+      *        CHAVES DE TESTES                                        *
+      *----------------------------------------------------------------*
+       01  AREA-CHAVES.
+           05  CH-PROCESSO             PIC  X(01) VALUE HIGH-VALUES.
+               88  FIM-PROCESSO                   VALUE SPACES
+               88  CONTINUA-PROCESSO              VALUE HIGH-VALUES.
+         
+      *----------------------------------------------------------------*
+      *        MENSAGENS DE ERRO                                       *
+      *----------------------------------------------------------------*
+       01  MENSAGENS.
+           05  MSG-SEM-PARAMETRO       PIC  X(60) VALUE
+               '** DADOS NAO CADASTRADOS NA TABELA DE PARAMETROS **'.
+           05  MSG-SEM-DADOS       PIC  X(60) VALUE
+               '** NAO EXISTEM DADOS A PROCESSAR **'.
+
+      *----------------------------------------------------------------*
+      *        LAYOUT DO ARQUIVO DE SAIDA                              *
+      *----------------------------------------------------------------*
+       01  WK-REG-RAMOS.
+           05 COD-SECTOR               PIC  9(04).
+           05 FILLER                   PIC  X(01) VALUE SPACES.
+           05 COD-RAMO                 PIC  9(03).
+           05 FILLER                   PIC  X(01) VALUE SPACES.
+           05 NOM-RAMO                 PIC  X(30).
+           05 FILLER                   PIC  X(11) VALUE SPACES.
+
+      *----------------------------------------------------------------*
+      *        SQL DECLARE SECTION                                     *
+      *----------------------------------------------------------------*
+
+       EXEC SQL BEGIN DECLARE SECTION END-EXEC.
+      *----------- CONEXAO
+       01  USUARIO                     PIC  X(30).
+       01  VAR-CON-ORA                 PIC  X(64).
+       01  VAR-JBCODCIA                PIC S9(02) COMP-3.
+       01  PAR-COD-ORIGEM              PIC S9(02) COMP-3.
+
+      *----------- PARAMETROS (A9989001)
+       01  PARAMETROS.
+           05  WK-CODCIA               PIC S9(02) COMP-3.
+
+      *------------ PRODUTOS (A1001800)
+       01  A5029042.
+           05  CODSECTOR               PIC S9(04) COMP-3.
+           05  CODRAMO                 PIC S9(03) COMP-3.
+           05  NOMRAMO                 PIC  X(30).
+      *
+       EXEC SQL END DECLARE SECTION END-EXEC.
+
+      *------------------ 
+      *------------------ 
+       PROCEDURE DIVISION.
+      *------------------ 
+      *------------------
+      *
+      *--------------
+       0000-CONTROLE.
+      *--------------
+
+           PERFORM 0010-INICIO                 THRU    0010-FIM.
+           
+           PERFORM 0020-PROCESSAMENTO          THRU    0020-FIM
+                   UNTIL FIM-PROCESSO.            
+
+           PERFORM 0030-FINAL.
+
+           STOP RUN.
+      *
+       0000-FIM.
+            EXIT.
+            
+      *------------
+       0010-INICIO.
+      *------------
+           CALL 'VAR-CONEX' USING VAR-CON-ORA, VAR-JBCODCIA.
+           EXEC SQL
+               CONNECT :VAR-CON-ORA
+           END-EXEC.
+             
+           MOVE    ZEROS                    TO   RESULTADO
+           PERFORM 0100-ACESSAR-PARAMETROS  THRU   0100-FIM.
+
+           IF  RESULTADO-A9989001 = 4 
+               DISPLAY   MSG-SEM-PARAMETRO 
+               STOP RUN 1
+           ELSE 
+               DISPLAY 'RESULTADO.........' RESULTADO-A9989001 CONVERT
+               DISPLAY 'VAR-JBCODCIA......' VAR-JBCODCIA CONVERT 
+               DISPLAY 'PARAMETRO PARA1 ..' WK-CODCIA CONVERT. 
+
+           MOVE ZEROES                      TO RESULTADO-A1001800.
+           PERFORM  0200-OBTER-PRODUTOS     THRU    0200-FIM.
+
+           IF FIM-PROCESSO 
+              DISPLAY   MSG-SEM-DADOS 
+              STOP RUN.
+
+           MOVE '/ap/batch/LISTARAMO.txt' TO WS-ARQSAIDA.
+           OPEN OUTPUT ARQ-SAIDA.
+
+         0010-FIM.   
+            EXIT.
+
+      *-------------------
+       0020-PROCESSAMENTO.
+      *-------------------
+
+           PERFORM 0300-GRAVA-ARQUIVO    THRU 0300-FIM.
+
+           PERFORM 0200-OBTER-PRODUTOS   THRU 0200-FIM.
+           
+       0020-FIM.   
+            EXIT.
+            
+       
+      *-----------
+       0030-FINAL.
+      *-----------
+           
+           EXEC SQL
+           BEGIN
+                UPDATE A9989001_vcr
+                   SET MCALIS      = 'N'
+                 WHERE NOMBRPT     = 'COBA03.pco'
+                   AND COD_CIA     = :VAR-JBCODCIA;
+           END;        
+           END-EXEC
+      
+           EXEC SQL
+                COMMIT
+           END-EXEC.
+
+           CLOSE ARQ-SAIDA.
+
+       0030-FIM.   
+            EXIT.
+      *------------------------
+       0100-ACESSAR-PARAMETROS.
+      *------------------------
+           EXEC SQL
+                SELECT
+                       TO_NUMBER(PARA1)
+                INTO
+                       :WK-CODCIA
+                FROM   A9989001_VCR
+                WHERE
+                     NOMBRPT  = 'COBA03.pco'
+                AND  MCALIS   = 'S'
+                AND  COD_CIA  = :VAR-JBCODCIA
+           END-EXEC.
+
+           MOVE RESULTADO                   TO RESULTADO-A9989001.
+
+       0100-FIM.
+            EXIT.
+      *--------------------
+       0200-OBTER-PRODUTOS.   
+      *--------------------
+           MOVE RESULTADO-A1001800         TO RESULTADO.
+      
+           EXEC SQL
+                SELECT COD_SECTOR,
+                       COD_RAMO, 
+                       NOM_RAMO
+                INTO   :CODSECTOR           ,
+                       :CODRAMO             ,
+                       :NOMRAMO             
+                FROM   A1001800
+                WHERE  COD_CIA           = :WK-CODCIA
+            END-EXEC.  
+
+            MOVE  RESULTADO                 TO  RESULTADO-A1001800.
+
+            IF RESULTADO-A1001800 = 4
+               MOVE SPACES                  TO CH-PROCESSO.
+            
+       0200-FIM.   
+            EXIT.
+      *--------------------
+       0300-GRAVA-ARQUIVO.   
+      *--------------------
+
+           MOVE CODSECTOR              TO COD-SECTOR.
+           MOVE CODRAMO                TO COD-RAMO.
+           MOVE NOMRAMO                TO NOM-RAMO.           
+
+           WRITE  REG-RAMOS  FROM WK-REG-RAMOS.
+           
+       0300-FIM.   
+            EXIT.
